@@ -1,0 +1,59 @@
+name: Automated Submission Grading
+
+# Runs on every push to main, but the grading job only executes when the
+# head commit message contains the trigger phrase "/grade". This lets students
+# push freely during development without burning API calls, and opt into
+# grading explicitly with a commit like:  git commit -m "final answer /grade"
+on:
+  push:
+    branches: [main]
+
+# Only one grading run per repo at a time. A second qualifying push is queued
+# rather than cancelled, so no submission is silently dropped.
+concurrency:
+  group: grading-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  grade:
+    # Gate the expensive steps on the trigger phrase.
+    if: contains(github.event.head_commit.message, '/grade')
+    runs-on: ubuntu-latest
+
+    # Least-privilege token scopes:
+    #   contents: write  -> required to post inline commit-line comments
+    #   issues:   write  -> required to open the summary feedback issue
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Check out student submission
+        uses: actions/checkout@v4
+        with:
+          # Fetch the commit plus its parent so the grader can compute diffs
+          # (needed to anchor inline comments to the right line positions).
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install grader dependencies
+        run: pip install --quiet openai PyGithub
+
+      - name: Grade submission and post feedback
+        env:
+          # --- Secrets (define these as ORG-level Actions secrets) ---
+          # LLM API key. Never store at repo level (a malicious PR could leak it).
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Full rubric / instructor key text (contents of instructor-key.md).
+          ASSIGNMENT_RUBRIC: ${{ secrets.ASSIGNMENT_RUBRIC }}
+          # --- Auto-injected by Actions; used to post comments + issue ---
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # --- Context passed to the grader ---
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SUBMISSION_SHA: ${{ github.sha }}
+          STUDENT_LOGIN: ${{ github.repository_owner }}
+        run: python scripts/grade.py
