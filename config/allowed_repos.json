@@ -1,0 +1,6 @@
+{
+  "allowed_repos": [
+    "/home/dev/projects/go-ethereum",
+    "/tmp/go-ethereum"
+  ]
+}
