@@ -2,7 +2,7 @@ We are building a git activity analyzer server
 - Commit patterns 
 - Hotspots
 - Build history 
-- Team structure 
+- Team structure  
 
 # 1. Questions. 
 
