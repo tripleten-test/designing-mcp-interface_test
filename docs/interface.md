@@ -4,7 +4,7 @@ We are building a git activity analyzer server
 - Build history 
 - Team structure 
 
-# 1. Questions.
+# 1. Questions. 
 
 Which files are risky to change?
   → min data: file change frequency (commit count per file), number of unique authors per file, recency of last change
