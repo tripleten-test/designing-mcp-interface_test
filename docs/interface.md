@@ -138,7 +138,7 @@ Who made the most code reviews?
 
 ## Tools (parameterized operations that compute and return results)
 
-### `analyze_hotspot`
+### `analyze_hotspot` 
 - Inputs: `repo_path`, `branch`, `since`, `until`, `top_n`, `min_commits`, `include_authors`, `path_filter`
 - Ranks files by churn score (commit frequency × author spread).
 - Returns top-N hotspot files with scores and optional author lists.
